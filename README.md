@@ -1,11 +1,11 @@
 # py-moebot
 
-A Python library intended to monitor (and control?) the MoeBot (https://moebot.com.au/) robotic lawn mowers.
+A Python library intended to monitor (and control?) the [MoeBot](https://moebot.com.au/) robotic lawn mowers.
 
-* MoeBot are controllable over WiFi via the Tuya protocol.
+* MoeBot are controllable over WiFi via the Tuya protocol, using the Tuya apps on your Apple/Android device.
 * Tested using a MoeBot S5 (which is identical to an S10 (and S20??) apart from battery size).
-* A number of other Robot Mowers appear to be identical; JIUDU (https://www.youtube.com/watch?v=-xFCVvPeR6c), AYI (https://www.youtube.com/watch?v=M9zYBOIgAg4)
-* Intent is to have a library that can then be used within Home-Assistant
+* A number of other Robot Mowers appear to be identical; [JIUDU](https://www.youtube.com/watch?v=-xFCVvPeR6c), [AYI](https://www.youtube.com/watch?v=M9zYBOIgAg4)
+* Intent is to have a library that can then be used within [Home-Assistant](http://www.home-assistant.io)
 
 # Goals
 
