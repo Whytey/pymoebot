@@ -1,0 +1,1 @@
+tuya-iot-py-sdk==0.6.6

@@ -1,0 +1,8 @@
+[TUYA_API]
+ENDPOINT = "https://openapi.tuyaeu.com"
+AUTH_TYPE = 0
+ACCESS_ID = ""
+ACCESS_SECRET = ""
+USERNAME = "name@yourmail.com"
+PASSWORD = ""
+CONF_COUNTRY_CODE = 61
