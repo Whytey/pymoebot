@@ -1,9 +1,14 @@
 import configparser
 
 
-def read_config(filename=None, ignore_defaults=False):
-    pass
+def read_config(filename=None):
+    config = configparser.RawConfigParser()
+    config.read('default.ini')
 
+    if filename:
+        config.read('sniffer.ini')
+
+    return config
 
 def main():
     print("More to come!")
