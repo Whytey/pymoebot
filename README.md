@@ -1,4 +1,4 @@
-# py-moebot
+# pymoebot
 
 A Python library intended to monitor (and control?) the [MoeBot](https://moebot.com.au/) robotic lawn mowers.
 

@@ -1,5 +1,5 @@
 import configparser
-
+from pymoebot import Connection
 
 def read_config(filename=None):
     config = configparser.RawConfigParser()
