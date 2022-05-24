@@ -10,16 +10,20 @@ A Python library intended to monitor (and control?) the [MoeBot](https://moebot.
 
 ## Goals
 
-1. Monitor the MoeBot
-2. Control the MoeBot
-3. Integrate into Home-Assistant stand-alone.
-4. If possible, merge into the Home-Assistant Tuya integration
+- [x] Monitor the MoeBot 
+- [ ] Control the MoeBot
+- [ ] Integrate into Home-Assistant stand-alone. 
+- [ ] If possible, merge into the Home-Assistant Tuya integration
 
 ## History
 
-It was originally intended to utilise the official `tuya-iot-python-sdk` library but that provided minimal support for the MoeBot.  Instead, this library now uses local communication with the MoeBot via the `tinytuya` library.  This does require a little bit of pre-work to identify the `LOCAL_KEY` for the device so that we can communicate with it.   Both libraries require us to have configured a Tuya Cloud project, follow these [instructions](https://github.com/jasonacox/tinytuya#setup-wizard---getting-local-keys) 
+It was originally intended to utilise the official `tuya-iot-python-sdk` library but that provided minimal support for the MoeBot.  Instead, this library now uses local communication with the MoeBot via the `tinytuya` library.  This does require a little bit of pre-work to identify the `LOCAL_KEY` for the device so that we can communicate with it.   
+
+Regardless of chosen library we are required to have configured a Tuya Cloud project, follow these [instructions](https://github.com/jasonacox/tinytuya#setup-wizard---getting-local-keys) 
 
 ## Using pymoebot
+> **_NOTE:_**  The MoeBot needs to have been activated by adding it to the Tuya/SmartLife app first.
+
 In it's most simplistic use, get an instance of `MoeBot` and query its status.
 
 ```python
@@ -42,7 +46,11 @@ import tinytuya
 
 d = tinytuya.Device('DEVICEID', 'DEVICEIP', 'DEVICEKEY')
 d.set_version(3.3)
-d.status()
+print(d.status())
+```
+Will result in:
+
+```
 {'dps': {'6': 100, '101': 'STANDBY', '102': 0, '103': 'MOWER_LEAN', '104': True, '105': 3, '106': 1111, '114': 'AutoMode'}}
 ```
 
@@ -87,45 +95,3 @@ The following appear to be sub-states for when the mower is in EMERGENCY state. 
 * MOWER_EMERGENCY
 * MOWER_UI_LOCKED
 * PLACE_INSIDE_STATION
-
-# API References
-### `/v1.0/iot-03/categories/gcj/functions`
-```
-[
-    {
-        "code": "mode",
-        "desc": "mode",
-        "name": "mode",
-        "type": "Enum",
-        "values": '{"range":["standby","random","smart","wall_follow","spiral","chargego"]}',
-    },
-    {
-        "code": "battery_percentage",
-        "desc": "battery percentage",
-        "name": "battery percentage",
-        "type": "Integer",
-        "values": '{"unit":"%","min":0,"max":100,"scale":0,"step":1}',
-    },
-    {
-        "code": "switch_go",
-        "desc": "switch go",
-        "name": "switch go",
-        "type": "Boolean",
-        "values": "{}",
-    },
-    {
-        "code": "direction_control",
-        "desc": "direction control",
-        "name": "direction control",
-        "type": "Enum",
-        "values": '{"range":["forward","backward","turn_left","turn_right","stop"]}',
-    },
-    {
-        "code": "switch",
-        "desc": "switch",
-        "name": "switch",
-        "type": "Boolean",
-        "values": "{}",
-    },
-]
-```
