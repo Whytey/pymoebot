@@ -1,28 +1,24 @@
 import setuptools
 
-from tinytuya import __version__
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="tinytuya",
-    version=__version__,
-    author="Jason Cox",
-    author_email="jason@jasonacox.com",
-    description="Python module to interface with Tuya WiFi smart devices",
+    name="pymoebot",
+    version="0.0.1",
+    author="David Whyte",
+    author_email="David@Whyte.xyz",
+    description="A Python library intended to monitor and control MoeBot robotic lawn mowers.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url='https://github.com/jasonacox/tinytuya',
+    url='https://github.com/Whytey/pymoebot',
     packages=setuptools.find_packages(),
     install_requires=[
-        'pycryptodome',  # Encryption - AES can also be provided via PyCrypto or pyaes
-        'requests',      # Used for Setup Wizard - Tuya IoT Platform calls
+        'tinytuya',  # Encryption - AES can also be provided via PyCrypto or pyaes
     ],
     classifiers=[
-        "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
 )
