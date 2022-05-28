@@ -30,6 +30,7 @@ class MoeBot:
     def __parse_payload(self, data):
         if 'Err' in data or 'dps' not in data:
             _log.error("Error from device: %r" % data)
+            return
         dps = data['dps']
         if '6' in dps:
             self.__battery = dps['6']

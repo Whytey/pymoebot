@@ -4,7 +4,12 @@ A Python library intended to monitor (and control?) the [MoeBot](https://moebot.
 
 * MoeBot are controllable over WiFi via the Tuya protocol, using the Tuya apps on your Apple/Android device.
 * Tested using an S5 model of MoeBot (which is identical to an S10 (and S20??) apart from battery size).
-* A number of other Robot Mowers appear to be identical; [JIUDU](https://www.youtube.com/watch?v=-xFCVvPeR6c), [AYI](https://www.youtube.com/watch?v=M9zYBOIgAg4)
+* A number of other Robot Mowers appear to be physically identical, though it is unconfirmed if they work (or even support WiFi control):
+  * [JIUDU DM2](https://www.youtube.com/watch?v=-xFCVvPeR6c)
+  * [AYI DRM3 600i](https://www.youtube.com/watch?v=M9zYBOIgAg4)
+  * [Hyundai HYRM1000](https://www.youtube.com/watch?v=kNKszbw8_g8)
+  * [Gtech RLM50](https://www.youtube.com/watch?v=t7GGCzNhHKc)
+  * [Sømløs G1/G1s](https://www.youtube.com/watch?v=LDyRpMmVYTs)
 * This library provides a MoeBot facade to the [tinytuya](https://github.com/jasonacox/tinytuya) library.
 * The ultimate intent is to have a library that can then be used within [Home-Assistant](http://www.home-assistant.io)
 
@@ -35,7 +40,7 @@ print("Battery level: %s%" % moebot.battery)
 
 See the [examples](https://github.com/Whytey/pymoebot/tree/main/examples) for full examples of usage.
 
-## Communicating with the MoeBot
+# Communicating with the MoeBot
 
 `tinytuya` have done all the hard work of communicating with the MoeBot.  It is worth sharing my understanding of the specifics about the MoeBot though, since I have made some assumptions and peer-review may be able to identify issues.
 
@@ -54,6 +59,7 @@ Will result in:
 {'dps': {'6': 100, '101': 'STANDBY', '102': 0, '103': 'MOWER_LEAN', '104': True, '105': 3, '106': 1111, '114': 'AutoMode'}}
 ```
 
+## Tuya Data Points
 | DPS  | Read/Write | Values                                                                                                                                                                 | Comment                                                                                 |
 |------|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
 | 6    | r/w       | 0-100                                                                                                                                                                  | 'Battery'                                                                               |
@@ -73,9 +79,9 @@ Will result in:
 | 114  | r/?       | AutoMode/??                                                                                                                                                            | 'WorkMode'                                                                              |
 | 115  | w         | <ul><li>StartMowing</li><li>StartFixedMowing</li><li>PauseWork</li><li>CancelWork</li><li>StartReturnStation</li><ul>                                                  | 'Machine Control CMD' used to change mower state                                        |
 
-# State Model
+## State Model
 
-## Main States
+### Main States
 The following are the declared states of the MoeBot seen so far.  They are signified by a '101' DPS.
 
 * CHARGING
@@ -88,10 +94,11 @@ The following are the declared states of the MoeBot seen so far.  They are signi
 * PARK - on the way back to the charging dock.
 * FIXED_MOWING - working in a spiral pattern.
 
-## EMERGENCY States
+### EMERGENCY States
 The following appear to be sub-states for when the mower is in EMERGENCY state.  They are signified by a '103' DPS.
 
 * MOWER_LEAN
 * MOWER_EMERGENCY
 * MOWER_UI_LOCKED
 * PLACE_INSIDE_STATION
+* BATTERY_NOT_ENOUGH
