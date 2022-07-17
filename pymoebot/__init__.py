@@ -23,9 +23,9 @@ class MoeBot:
         self.__mow_in_rain = None
         self.__mow_time = None
 
-        payload = self.__device.status()
-        if not self.__parse_payload(payload):
-            raise MoeBotConnectionError()
+        # payload = self.__device.status()
+        # if not self.__parse_payload(payload):
+        #     raise MoeBotConnectionError()
 
     def __parse_payload(self, data) -> bool:
         if 'Err' in data or 'dps' not in data:
