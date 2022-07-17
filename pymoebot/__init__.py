@@ -23,6 +23,8 @@ class MoeBot:
         self.__mow_in_rain = None
         self.__mow_time = None
 
+        _log.error("test error")
+
         # payload = self.__device.status()
         # if not self.__parse_payload(payload):
         #     raise MoeBotConnectionError()
