@@ -1,4 +1,5 @@
 import logging
+import threading
 
 import tinytuya
 
@@ -15,6 +16,9 @@ class MoeBot:
         self.__device.set_version(3.3)
         self.__device.set_socketPersistent(True)
 
+        self.__thread = threading.Thread(target=self.listen)
+        self.__thread.start()
+
         self.__listeners = []
 
         self.__battery = None
@@ -23,17 +27,11 @@ class MoeBot:
         self.__mow_in_rain = None
         self.__mow_time = None
 
-        _log.error("test error")
-
-        # payload = self.__device.status()
-        # if not self.__parse_payload(payload):
-        #     raise MoeBotConnectionError()
-
     def __parse_payload(self, data) -> bool:
         if 'Err' in data or 'dps' not in data:
             _log.error("Error from device: %r" % data)
             return False
-        
+
         dps = data['dps']
         if '6' in dps:
             self.__battery = dps['6']
@@ -45,10 +43,10 @@ class MoeBot:
             self.__mow_in_rain = dps['104']
         if '105' in dps:
             self.__mow_time = dps['105']
-        
+
         return True
 
-    async def listen(self):
+    def listen(self):
         _log.debug(" > Send Request for Status < ")
         payload = self.__device.generate_payload(tinytuya.DP_QUERY)
         self.__device.send(payload)
@@ -85,7 +83,7 @@ class MoeBot:
 
     @property
     def mow_in_rain(self) -> bool:
-        return self.mow_in_rain
+        return self.__mow_in_rain
 
     @mow_in_rain.setter
     def mow_in_rain(self, mow_in_rain: bool):
