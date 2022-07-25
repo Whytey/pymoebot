@@ -128,3 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 /examples/sniffer/sniffer.ini
+/.idea/
+/.vscode/
