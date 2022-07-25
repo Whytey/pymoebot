@@ -24,8 +24,8 @@ def listener(msg):
     print(msg)
 
 
-async def main():
-    logging.basicConfig(format='%(asctime)s %(name)s - %(levelname)s:%(message)s',
+def main():
+    logging.basicConfig(format='%(asctime)s %(levelname)s [%(name)s] %(message)s',
                         level=logging.INFO)
     logging.info("Started sniffer")
 
@@ -37,8 +37,9 @@ async def main():
     logging.info("Got a MoeBot: %s" % moebot)
 
     moebot.add_listener(listener)
-    await moebot.listen()
+    # await moebot.listen()
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # asyncio.run(main())
+    main()
