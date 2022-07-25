@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+import threading
 
 import tinytuya
 
@@ -16,6 +16,9 @@ class MoeBot:
         self.__device.set_version(3.3)
         self.__device.set_socketPersistent(True)
 
+        self.__thread = threading.Thread(target=self.listen)
+        self.__thread.start()
+
         self.__listeners = []
 
         self.__battery = None
@@ -24,12 +27,11 @@ class MoeBot:
         self.__mow_in_rain = None
         self.__mow_time = None
 
-        payload = self.__device.status()
-        self.__parse_payload(payload)
-
-    def __parse_payload(self, data):
+    def __parse_payload(self, data) -> bool:
         if 'Err' in data or 'dps' not in data:
             _log.error("Error from device: %r" % data)
+            return False
+
         dps = data['dps']
         if '6' in dps:
             self.__battery = dps['6']
@@ -42,7 +44,9 @@ class MoeBot:
         if '105' in dps:
             self.__mow_time = dps['105']
 
-    async def listen(self):
+        return True
+
+    def listen(self):
         _log.debug(" > Send Request for Status < ")
         payload = self.__device.generate_payload(tinytuya.DP_QUERY)
         self.__device.send(payload)
@@ -52,7 +56,7 @@ class MoeBot:
             # See if any data is available
             data = self.__device.receive()
             if data is not None:
-                _log.debug("%s - Received Payload: %r" % (datetime.now().strftime("%Y/%m/%d-%H:%M:%S"), data))
+                _log.debug("Received Payload: %r", data, exc_info=1)
 
                 self.__parse_payload(data)
                 for listener in self.__listeners:
@@ -79,7 +83,7 @@ class MoeBot:
 
     @property
     def mow_in_rain(self) -> bool:
-        return self.mow_in_rain
+        return self.__mow_in_rain
 
     @mow_in_rain.setter
     def mow_in_rain(self, mow_in_rain: bool):
@@ -95,3 +99,7 @@ class MoeBot:
 
     def __repr__(self) -> str:
         return "[MoeBot - {id: %s, state: %s, battery: %s}]" % (self.id, self.__state, self.__battery)
+
+
+class MoeBotConnectionError(Exception):
+    pass
