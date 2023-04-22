@@ -100,7 +100,7 @@ class MoeBot:
 
     def start(self, spiral=False) -> None:
         _log.debug("Attempting to start mowing: %r", self.__state)
-        if self.__state in ("STANDBY", "PAUSED"):
+        if self.__state in ("STANDBY", "PAUSED", "CHARGING"):
             self.__device.set_value('115', "StartMowing")
         else:
             _log.error("Unable to start due to current state: %r", self.__state)
@@ -119,7 +119,7 @@ class MoeBot:
         if self.__state in ("PAUSED", "CHARGING_WITH_TASK_SUSPEND"):
             self.__device.set_value('115', "CancelWork")
         else:
-            _log.error("Unable to pause due to current state: %r", self.__state)
+            _log.error("Unable to cancel due to current state: %r", self.__state)
             raise MoeBotStateException()
 
     def dock(self) -> None:
