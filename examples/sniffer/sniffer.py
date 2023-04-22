@@ -37,9 +37,7 @@ def main():
     logging.info("Got a MoeBot: %s" % moebot)
 
     moebot.add_listener(listener)
-    # await moebot.listen()
 
 
 if __name__ == "__main__":
-    # asyncio.run(main())
     main()
