@@ -7,6 +7,7 @@ _log = logging.getLogger("pymoebot")
 
 
 class MoeBot:
+
     def __init__(self, device_id: str, device_ip: str, local_key: str) -> None:
         self.__id = device_id
         self.__ip = device_ip
@@ -97,8 +98,44 @@ class MoeBot:
     def state(self) -> None:
         return self.__state
 
+    def start(self, spiral=False) -> None:
+        _log.debug("Attempting to start mowing: %r", self.__state)
+        if self.__state in ("STANDBY", "PAUSED"):
+            self.__device.set_value('115', "StartMowing")
+        else:
+            _log.error("Unable to start due to current state: %r", self.__state)
+            raise MoeBotStateException()
+
+    def pause(self) -> None:
+        _log.debug("Attempting to pause mowing: %r", self.__state)
+        if self.__state in ("MOWING", "FIXED_MOWING"):
+            self.__device.set_value('115', "PauseWork")
+        else:
+            _log.error("Unable to pause due to current state: %r", self.__state)
+            raise MoeBotStateException()
+
+    def cancel(self) -> None:
+        _log.debug("Attempting to cancel mowing: %r", self.__state)
+        if self.__state in ("PAUSED", "CHARGING_WITH_TASK_SUSPEND"):
+            self.__device.set_value('115', "CancelWork")
+        else:
+            _log.error("Unable to pause due to current state: %r", self.__state)
+            raise MoeBotStateException()
+
+    def dock(self) -> None:
+        _log.debug("Attempting to dock mower: %r", self.__state)
+        if self.__state in ("STANDBY", "STANDBY"):
+            self.__device.set_value('115', "StartReturnStation")
+        else:
+            _log.error("Unable to dock due to current state: %r", self.__state)
+            raise MoeBotStateException()
+
     def __repr__(self) -> str:
         return "[MoeBot - {id: %s, state: %s, battery: %s}]" % (self.id, self.__state, self.__battery)
+
+
+class MoeBotStateException(Exception):
+    pass
 
 
 class MoeBotConnectionError(Exception):
