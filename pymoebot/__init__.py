@@ -19,6 +19,7 @@ class MoeBot:
 
         self.__thread = threading.Thread(target=self.listen)
         self.__thread.start()
+        self.__shutdown = threading.Event()
 
         self.__listeners = []
 
@@ -47,13 +48,19 @@ class MoeBot:
 
         return True
 
-    def listen(self):
+    def __query_state(self):
         _log.debug(" > Send Request for Status < ")
         payload = self.__device.generate_payload(tinytuya.DP_QUERY)
         self.__device.send(payload)
 
+    def listen(self):
+        self.__query_state()
+
         _log.debug(" > Begin Monitor Loop <")
         while True:
+            if self.__shutdown.is_set():
+                _log.debug("Thread has been shutdown, exiting listen loop")
+                break
             # See if any data is available
             data = self.__device.receive()
             if data is not None:
@@ -69,6 +76,11 @@ class MoeBot:
 
     def add_listener(self, listener) -> None:
         self.__listeners.append(listener)
+
+    def unlisten(self) -> None:
+        _log.debug("Unlistening to MoeBot")
+        self.__shutdown.set()
+        self.__thread.join()
 
     @property
     def id(self) -> str:
@@ -101,7 +113,16 @@ class MoeBot:
     def start(self, spiral=False) -> None:
         _log.debug("Attempting to start mowing: %r", self.__state)
         if self.__state in ("STANDBY", "PAUSED", "CHARGING"):
-            self.__device.set_value('115', "StartMowing")
+            if self.__state == "PAUSED":
+                _log.debug("ContinueWork")
+                self.__device.set_value('115', "ContinueWork")
+            elif not spiral:
+                _log.debug("StartMowing")
+                self.__device.set_value('115', "StartMowing")
+            else:
+                _log.debug("StartFixedMowing")
+                self.__device.set_value('115', "StartFixedMowing")
+            self.__query_state()
         else:
             _log.error("Unable to start due to current state: %r", self.__state)
             raise MoeBotStateException()
@@ -110,6 +131,7 @@ class MoeBot:
         _log.debug("Attempting to pause mowing: %r", self.__state)
         if self.__state in ("MOWING", "FIXED_MOWING"):
             self.__device.set_value('115', "PauseWork")
+            self.__query_state()
         else:
             _log.error("Unable to pause due to current state: %r", self.__state)
             raise MoeBotStateException()
@@ -118,6 +140,11 @@ class MoeBot:
         _log.debug("Attempting to cancel mowing: %r", self.__state)
         if self.__state in ("PAUSED", "CHARGING_WITH_TASK_SUSPEND"):
             self.__device.set_value('115', "CancelWork")
+
+            # When work is cancelled, the mower will send two reports; one to confirm the new state and one to
+            # report on the work completed.  Often only one comes through, so we need to query state to ensure 
+            # we know it.
+            self.__query_state()
         else:
             _log.error("Unable to cancel due to current state: %r", self.__state)
             raise MoeBotStateException()
@@ -126,6 +153,7 @@ class MoeBot:
         _log.debug("Attempting to dock mower: %r", self.__state)
         if self.__state in ("STANDBY", "STANDBY"):
             self.__device.set_value('115', "StartReturnStation")
+            self.__query_state()
         else:
             _log.error("Unable to dock due to current state: %r", self.__state)
             raise MoeBotStateException()

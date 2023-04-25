@@ -16,9 +16,8 @@ A Python library intended to monitor (and control?) the [MoeBot](https://moebot.
 ## Goals
 
 - [x] Monitor the MoeBot 
-- [ ] Control the MoeBot
-- [ ] Integrate into Home-Assistant stand-alone. 
-- [ ] If possible, merge into the Home-Assistant Tuya integration
+- [x] Control the MoeBot
+- [x] Integrate into Home-Assistant stand-alone.
 
 ## History
 
@@ -60,24 +59,24 @@ Will result in:
 ```
 
 ## Tuya Data Points
-| DPS  | Read/Write | Values                                                                                                                                                                 | Comment                                                                                 |
-|------|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
-| 6    | r/w       | 0-100                                                                                                                                                                  | 'Battery'                                                                               |
+| DPS  | Read/Write | Values                                                                                                                                                                                       | Comment                                                                                 |
+|------|-----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| 6    | r/w       | 0-100                                                                                                                                                                                        | 'Battery'                                                                               |
 | 101  | r         | <ul><li>STANDBY</li><li>MOWING</li><li>CHARGING</li><li>EMERGENCY</li><li>LOCKED</li><li>PAUSED</li><li>PARK</li><li>CHARGING_WITH_TASK_SUSPEND</li><li>FIXED_MOWING</li><li>ERROR</li></ul> | 'Machine Status' Provides state - can't seem to command state using this                |
-| 102  | r         | 0                                                                                                                                                                      | 'Machine error'                                                                         |
-| 103  | r         | <ul><li>MOWER_LEAN</li><li>MOWER_EMERGENCY</li><li>MOWER_UI_LOCKED</li><li>NO_LOOP_SIGNAL</li><li>BATTERY_NOT_ENOUGH</li><ul>                                                                                            | 'Machine warning' Provides sub-states for when the mower is in EMERGENCY                |
-| 104  | r/w       | True/False                                                                                                                                                             | 'Rain mode' Should we work in the rain?                                                 |
-| 105  | r/w       | 1-99                                                                                                                                                                   | 'work time' How many hours to run for when started manually                             |
-| 106  | r/?       | 1111                                                                                                                                                                   | 'machine password'                                                                      |
-| 107  | w         | True/False                                                                                                                                                             | 'Clear machine appointment' results in a DPS 110 response                               |
-| 108  | w         | True/False                                                                                                                                                             | 'Query machine reservation' results in a DPS 110 response                               | 
-| 109  | w         | True/False                                                                                                                                                             | 'query partition parameters' results in a DPS 113 response                              |
-| 110  | r/w       | [byte data]                                                                                                                                                            | 'Report machine Reservation'                                                            |
-| 111  | r/?      | [byte data]                                                                                                                                                            | 'error log'                                                                             |
-| 112  | r/w       | [byte data]                                                                                                                                                            | 'work log' Report of mower working time after work has completed, contains last 10 logs |
-| 113  | r/w       | [byte data]                                                                                                                                                            | 'Partition parameters' specifies the zone mowing configuration                          |
-| 114  | r/?       | AutoMode/??                                                                                                                                                            | 'WorkMode'                                                                              |
-| 115  | w         | <ul><li>StartMowing</li><li>StartFixedMowing</li><li>PauseWork</li><li>CancelWork</li><li>StartReturnStation</li><ul>                                                  | 'Machine Control CMD' used to change mower state                                        |
+| 102  | r         | 0                                                                                                                                                                                            | 'Machine error'                                                                         |
+| 103  | r         | <ul><li>MOWER_LEAN</li><li>MOWER_EMERGENCY</li><li>MOWER_UI_LOCKED</li><li>NO_LOOP_SIGNAL</li><li>BATTERY_NOT_ENOUGH</li><ul>                                                                | 'Machine warning' Provides sub-states for when the mower is in EMERGENCY                |
+| 104  | r/w       | True/False                                                                                                                                                                                   | 'Rain mode' Should we work in the rain?                                                 |
+| 105  | r/w       | 1-99                                                                                                                                                                                         | 'work time' How many hours to run for when started manually                             |
+| 106  | r/?       | 1111                                                                                                                                                                                         | 'machine password'                                                                      |
+| 107  | w         | True/False                                                                                                                                                                                   | 'Clear machine appointment' results in a DPS 110 response                               |
+| 108  | w         | True/False                                                                                                                                                                                   | 'Query machine appointment' results in a DPS 110 response                               | 
+| 109  | w         | True/False                                                                                                                                                                                   | 'query partition parameters' results in a DPS 113 response                              |
+| 110  | r/w       | [byte data]                                                                                                                                                                                  | 'Report machine appointment'                                                            |
+| 111  | r/?      | [byte data]                                                                                                                                                                                  | 'error log'                                                                             |
+| 112  | r/w       | [byte data]                                                                                                                                                                                  | 'work log' Report of mower working time after work has completed, contains last 10 logs |
+| 113  | r/w       | [byte data]                                                                                                                                                                                  | 'Partition parameters' specifies the zone mowing configuration                          |
+| 114  | r/?       | AutoMode/??                                                                                                                                                                                  | 'WorkMode'                                                                              |
+| 115  | w         | <ul><li>StartMowing</li><li>StartFixedMowing</li><li>PauseWork</li><li>ContinueWork</li><li>CancelWork</li><li>StartReturnStation</li><ul>                                                   | 'Machine Control CMD' used to change mower state                                        |
 
 ## State Model
 
