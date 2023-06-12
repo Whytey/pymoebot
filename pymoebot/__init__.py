@@ -138,7 +138,7 @@ class MoeBot:
 
     def cancel(self) -> None:
         _log.debug("Attempting to cancel mowing: %r", self.__state)
-        if self.__state in ("PAUSED", "CHARGING_WITH_TASK_SUSPEND"):
+        if self.__state in ("PAUSED", "CHARGING_WITH_TASK_SUSPEND", "PARK"):
             self.__device.set_value('115', "CancelWork")
 
             # When work is cancelled, the mower will send two reports; one to confirm the new state and one to
