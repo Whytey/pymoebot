@@ -28,12 +28,14 @@ class MoeBot:
         self.__emergency_state = None
         self.__mow_in_rain = None
         self.__mow_time = None
+        self.__work_mode = None
 
     def __parse_payload(self, data) -> bool:
-        if 'Err' in data or 'dps' not in data:
+        if data is None or 'Err' in data or 'dps' not in data:
             _log.error("Error from device: %r" % data)
             return False
-
+        
+        _log.debug("Parsing data from device: %r" % data)
         dps = data['dps']
         if '6' in dps:
             self.__battery = dps['6']
@@ -45,16 +47,20 @@ class MoeBot:
             self.__mow_in_rain = dps['104']
         if '105' in dps:
             self.__mow_time = dps['105']
+        if '114' in dps:
+            self.__work_mode = dps['114']
 
         return True
 
-    def __query_state(self):
+    # def __query_state(self):
+    #     _log.debug(" > Send Request for Status < ")
+    #     payload = self.__device.generate_payload(tinytuya.DP_QUERY)
+    #     self.__device.send(payload)
+
+    def listen(self):
         _log.debug(" > Send Request for Status < ")
         payload = self.__device.generate_payload(tinytuya.DP_QUERY)
         self.__device.send(payload)
-
-    def listen(self):
-        self.__query_state()
 
         _log.debug(" > Begin Monitor Loop <")
         while True:
@@ -92,7 +98,8 @@ class MoeBot:
 
     @mow_time.setter
     def mow_time(self, mow_time: int):
-        self.__device.set_value('105', mow_time)
+        result = self.__device.set_value(105, mow_time)
+        self.__parse_payload(result)
 
     @property
     def mow_in_rain(self) -> bool:
@@ -100,29 +107,38 @@ class MoeBot:
 
     @mow_in_rain.setter
     def mow_in_rain(self, mow_in_rain: bool):
-        self.__device.set_value('104', mow_in_rain)
+        result = self.__device.set_value(104, mow_in_rain)
+        self.__parse_payload(result)
 
     @property
     def battery(self) -> int:
         return self.__battery
 
     @property
-    def state(self) -> None:
+    def state(self) -> str:
         return self.__state
+
+    @property
+    def emergency_state(self) -> str:
+        return self.__emergency_state
+
+    @property
+    def work_mode(self) -> str:
+        return self.__work_mode
 
     def start(self, spiral=False) -> None:
         _log.debug("Attempting to start mowing: %r", self.__state)
         if self.__state in ("STANDBY", "PAUSED", "CHARGING"):
             if self.__state == "PAUSED":
                 _log.debug("ContinueWork")
-                self.__device.set_value('115', "ContinueWork")
+                result = self.__device.set_value(115, "ContinueWork")
             elif not spiral:
                 _log.debug("StartMowing")
-                self.__device.set_value('115', "StartMowing")
+                result = self.__device.set_value(115, "StartMowing")
             else:
                 _log.debug("StartFixedMowing")
-                self.__device.set_value('115', "StartFixedMowing")
-            self.__query_state()
+                result = self.__device.set_value(115, "StartFixedMowing")
+            self.__parse_payload(result)
         else:
             _log.error("Unable to start due to current state: %r", self.__state)
             raise MoeBotStateException()
@@ -130,8 +146,8 @@ class MoeBot:
     def pause(self) -> None:
         _log.debug("Attempting to pause mowing: %r", self.__state)
         if self.__state in ("MOWING", "FIXED_MOWING"):
-            self.__device.set_value('115', "PauseWork")
-            self.__query_state()
+            result = self.__device.set_value(115, "PauseWork")
+            self.__parse_payload(result)
         else:
             _log.error("Unable to pause due to current state: %r", self.__state)
             raise MoeBotStateException()
@@ -139,12 +155,13 @@ class MoeBot:
     def cancel(self) -> None:
         _log.debug("Attempting to cancel mowing: %r", self.__state)
         if self.__state in ("PAUSED", "CHARGING_WITH_TASK_SUSPEND"):
-            self.__device.set_value('115', "CancelWork")
+            result = self.__device.set_value('115', "CancelWork")
+            self.__parse_payload(result)
 
-            # When work is cancelled, the mower will send two reports; one to confirm the new state and one to
-            # report on the work completed.  Often only one comes through, so we need to query state to ensure 
-            # we know it.
-            self.__query_state()
+            # # When work is cancelled, the mower will send two reports; one to confirm the new state and one to
+            # # report on the work completed.  Often only one comes through, so we need to query state to ensure 
+            # # we know it.
+            # self.__query_state()
         else:
             _log.error("Unable to cancel due to current state: %r", self.__state)
             raise MoeBotStateException()
@@ -152,8 +169,8 @@ class MoeBot:
     def dock(self) -> None:
         _log.debug("Attempting to dock mower: %r", self.__state)
         if self.__state in ("STANDBY", "STANDBY"):
-            self.__device.set_value('115', "StartReturnStation")
-            self.__query_state()
+            result = self.__device.set_value('115', "StartReturnStation")
+            self.__parse_payload(result)
         else:
             _log.error("Unable to dock due to current state: %r", self.__state)
             raise MoeBotStateException()
