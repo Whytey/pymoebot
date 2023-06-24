@@ -34,7 +34,7 @@ class MoeBot:
         if data is None or 'Err' in data or 'dps' not in data:
             _log.error("Error from device: %r" % data)
             return False
-        
+
         _log.debug("Parsing data from device: %r" % data)
         dps = data['dps']
         if '6' in dps:
@@ -51,11 +51,6 @@ class MoeBot:
             self.__work_mode = dps['114']
 
         return True
-
-    # def __query_state(self):
-    #     _log.debug(" > Send Request for Status < ")
-    #     payload = self.__device.generate_payload(tinytuya.DP_QUERY)
-    #     self.__device.send(payload)
 
     def listen(self):
         _log.debug(" > Send Request for Status < ")
@@ -158,10 +153,6 @@ class MoeBot:
             result = self.__device.set_value('115', "CancelWork")
             self.__parse_payload(result)
 
-            # # When work is cancelled, the mower will send two reports; one to confirm the new state and one to
-            # # report on the work completed.  Often only one comes through, so we need to query state to ensure 
-            # # we know it.
-            # self.__query_state()
         else:
             _log.error("Unable to cancel due to current state: %r", self.__state)
             raise MoeBotStateException()
