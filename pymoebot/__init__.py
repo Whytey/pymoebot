@@ -149,8 +149,8 @@ class MoeBot:
 
     def cancel(self) -> None:
         _log.debug("Attempting to cancel mowing: %r", self.__state)
-        if self.__state in ("PAUSED", "CHARGING_WITH_TASK_SUSPEND"):
-            result = self.__device.set_value('115', "CancelWork")
+        if self.__state in ("PAUSED", "CHARGING_WITH_TASK_SUSPEND", "PARK"):
+            result = self.__device.set_value(115, "CancelWork")
             self.__parse_payload(result)
 
         else:
@@ -160,7 +160,7 @@ class MoeBot:
     def dock(self) -> None:
         _log.debug("Attempting to dock mower: %r", self.__state)
         if self.__state in ("STANDBY", "STANDBY"):
-            result = self.__device.set_value('115', "StartReturnStation")
+            result = self.__device.set_value(115, "StartReturnStation")
             self.__parse_payload(result)
         else:
             _log.error("Unable to dock due to current state: %r", self.__state)
