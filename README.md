@@ -10,6 +10,7 @@ A Python library intended to monitor (and control?) the [MoeBot](https://moebot.
   * [Hyundai HYRM1000](https://www.youtube.com/watch?v=kNKszbw8_g8)
   * [Gtech RLM50](https://www.youtube.com/watch?v=t7GGCzNhHKc)
   * [Sømløs G1/G1s](https://www.youtube.com/watch?v=LDyRpMmVYTs)
+  * [iHunt RoboMower APP 2500m2 PRO](https://www.ihunt.ro/ihunt-robomower-pro)
 * This library provides a MoeBot facade to the [tinytuya](https://github.com/jasonacox/tinytuya) library.
 * The ultimate intent is to have a library that can then be used within [Home-Assistant](http://www.home-assistant.io)
 
@@ -17,7 +18,7 @@ A Python library intended to monitor (and control?) the [MoeBot](https://moebot.
 
 - [x] Monitor the MoeBot 
 - [x] Control the MoeBot
-- [x] Integrate into Home-Assistant stand-alone.
+- [x] Integrate into Home-Assistant stand-alone - see [moebot-hass-integration](https://github.com/Whytey/moebot-hass-integration).
 
 ## History
 
