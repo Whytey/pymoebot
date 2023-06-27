@@ -14,12 +14,11 @@ class MoeBot:
         self.__key = local_key
 
         self.__device = tinytuya.Device(self.__id, self.__ip, self.__key)
-        self.__device.set_version(3.3)
-        self.__device.set_socketPersistent(True)
 
-        self.__thread = threading.Thread(target=self.listen)
-        self.__thread.start()
-        self.__shutdown = threading.Event()
+        self.__tuya_version = self.__do_proto_check()
+        self.__device.set_version(self.__tuya_version)
+
+        self.__thread = threading.Thread(target=self.__loop)
 
         self.__listeners = []
 
@@ -29,12 +28,25 @@ class MoeBot:
         self.__mow_in_rain = None
         self.__mow_time = None
         self.__work_mode = None
+        self.__online = False
+
+    def __do_proto_check(self) -> float:
+        versions = [3.4, 3.3]
+        for version in versions:
+            self.__device.set_version(version)
+            result = self.__device.status()
+            _log.debug("Set TUYA version to %r and got the following result: %r" % (version, result))
+            if self.__parse_payload(result):
+                return version
 
     def __parse_payload(self, data) -> bool:
         if data is None or 'Err' in data or 'dps' not in data:
             _log.error("Error from device: %r" % data)
+            if 'Err' in data and data['Err'] == 905:
+                self.__online = False
             return False
 
+        self.__online = True
         _log.debug("Parsing data from device: %r" % data)
         dps = data['dps']
         if '6' in dps:
@@ -52,7 +64,17 @@ class MoeBot:
 
         return True
 
+    def poll(self):
+        result = self.__device.status()
+        self.__parse_payload(result)
+
     def listen(self):
+        self.__device.set_socketPersistent(True)
+
+        self.__thread.start()
+        self.__shutdown = threading.Event()
+
+    def __loop(self):
         _log.debug(" > Send Request for Status < ")
         payload = self.__device.generate_payload(tinytuya.DP_QUERY)
         self.__device.send(payload)
@@ -82,10 +104,19 @@ class MoeBot:
         _log.debug("Unlistening to MoeBot")
         self.__shutdown.set()
         self.__thread.join()
+        self.__device.set_socketPersistent(False)
 
     @property
     def id(self) -> str:
         return self.__id
+
+    @property
+    def online(self) -> str:
+        return self.__online
+
+    @property
+    def tuya_version(self) -> str:
+        return self.__tuya_version
 
     @property
     def mow_time(self) -> int:

@@ -13,7 +13,7 @@ def read_config(filename=None):
     if filename:
         if os.path.exists(filename):
             logging.debug("Reading extra config from '%s'", filename)
-            config.read('sniffer.ini')
+            config.read(filename)
         else:
             logging.warning("config file '%s' doesn't exist, ignoring.", filename)
 
@@ -37,6 +37,11 @@ def main():
     logging.info("Got a MoeBot: %s" % moebot)
 
     moebot.add_listener(listener)
+
+    try:
+        moebot.listen()
+    except KeyboardInterrupt:
+        moebot.unlisten()
 
 
 if __name__ == "__main__":
