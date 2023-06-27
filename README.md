@@ -29,16 +29,31 @@ Regardless of chosen library we are required to have configured a Tuya Cloud pro
 ## Using pymoebot
 > **_NOTE:_**  The MoeBot needs to have been activated by adding it to the Tuya/SmartLife app first.
 
-In it's most simplistic use, get an instance of `MoeBot` and query its status.
+In it's most simplistic use, get an instance of `MoeBot`, poll for data and then show its attributes.
 
 ```python
 from pymoebot import MoeBot
 
 moebot = MoeBot('DEVICE_ID', 'IP', 'LOCAL_KEY')
+moebot.poll()
 print("Battery level: %s%" % moebot.battery)
 ```
 
-See the [examples](https://github.com/Whytey/pymoebot/tree/main/examples) for full examples of usage.
+Alternatively, register as a listener and then start the listening thread on your `MoeBot`.
+
+```python
+from pymoebot import MoeBot
+
+moebot = MoeBot('DEVICE_ID', 'IP', 'LOCAL_KEY')
+moebot.add_listener(lambda d: print("Got data: %s", d))
+moebot.listen()
+
+# Do some other stuff
+
+moebot.unlisten()
+```
+
+See the [examples](https://github.com/Whytey/pymoebot/tree/main/examples) for further examples of usage.
 
 # Communicating with the MoeBot
 
