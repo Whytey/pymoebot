@@ -5,7 +5,7 @@ import tinytuya
 
 _log = logging.getLogger("pymoebot")
 
-__version_tuple = (0, 2, 1)
+__version_tuple = (0, 2, 2)
 __version__ = "%d.%d.%d" % __version_tuple
 
 
