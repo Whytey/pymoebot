@@ -1,4 +1,3 @@
-__version__ = "%d.%d.%d" % (0, 2, 2)
-__author__ = 'David Whyte'
-
 from .core import *
+from .core import __author__
+from .core import __version__
