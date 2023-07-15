@@ -5,6 +5,8 @@ import tinytuya
 
 _log = logging.getLogger("pymoebot")
 
+version_tuple = (0,2,1)
+version = __version__ = "%d.%d.%d" % version_tuple
 
 class MoeBot:
 
@@ -19,6 +21,7 @@ class MoeBot:
         self.__device.set_version(self.__tuya_version)
 
         self.__thread = threading.Thread(target=self.__loop)
+        self.__shutdown = threading.Event()
 
         self.__listeners = []
 
@@ -70,9 +73,8 @@ class MoeBot:
 
     def listen(self):
         self.__device.set_socketPersistent(True)
-
+        self.__shutdown.clear()
         self.__thread.start()
-        self.__shutdown = threading.Event()
 
     def __loop(self):
         _log.debug(" > Send Request for Status < ")
@@ -151,6 +153,10 @@ class MoeBot:
     @property
     def work_mode(self) -> str:
         return self.__work_mode
+
+    @property
+    def is_listening(self) -> str:
+        return self.__shutdown.is_set()
 
     def start(self, spiral=False) -> None:
         _log.debug("Attempting to start mowing: %r", self.__state)
