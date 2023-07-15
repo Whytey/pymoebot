@@ -21,8 +21,9 @@ class MoeBot:
         self.__tuya_version = self.__do_proto_check()
         self.__device.set_version(self.__tuya_version)
 
-        self.__thread = threading.Thread(target=self.__loop)
+        self.__thread = None
         self.__shutdown = threading.Event()
+        self.__shutdown.set() #The thread should be flagged as not running
 
         self.__listeners = []
 
@@ -72,11 +73,6 @@ class MoeBot:
         result = self.__device.status()
         self.__parse_payload(result)
 
-    def listen(self):
-        self.__device.set_socketPersistent(True)
-        self.__shutdown.clear()
-        self.__thread.start()
-
     def __loop(self):
         _log.debug(" > Send Request for Status < ")
         payload = self.__device.generate_payload(tinytuya.DP_QUERY)
@@ -90,7 +86,7 @@ class MoeBot:
             # See if any data is available
             data = self.__device.receive()
             if data is not None:
-                _log.debug("Received Payload: %r", data, exc_info=1)
+                _log.debug("Received Payload: %r", data)
 
                 self.__parse_payload(data)
                 for listener in self.__listeners:
@@ -100,6 +96,16 @@ class MoeBot:
             payload = self.__device.generate_payload(tinytuya.HEART_BEAT)
             self.__device.send(payload)
 
+    def listen(self):
+        if self.__shutdown.is_set():
+            self.__thread = threading.Thread(target=self.__loop)
+            self.__thread.name = "pymoebot"
+            self.__device.set_socketPersistent(True)
+            self.__shutdown.clear()
+            self.__thread.start()
+        else:
+            _log.error("Thread was already running")
+
     def add_listener(self, listener) -> None:
         self.__listeners.append(listener)
 
@@ -108,6 +114,10 @@ class MoeBot:
         self.__shutdown.set()
         self.__thread.join()
         self.__device.set_socketPersistent(False)
+
+    @property
+    def is_listening(self) -> str:
+        return not self.__shutdown.is_set()
 
     @property
     def id(self) -> str:
@@ -158,10 +168,6 @@ class MoeBot:
     @property
     def work_mode(self) -> str:
         return self.__work_mode
-
-    @property
-    def is_listening(self) -> str:
-        return self.__shutdown.is_set()
 
     def start(self, spiral=False) -> None:
         _log.debug("Attempting to start mowing: %r", self.__state)
