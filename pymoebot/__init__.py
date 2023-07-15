@@ -42,7 +42,7 @@ class MoeBot:
     def __parse_payload(self, data) -> bool:
         if data is None or 'Err' in data or 'dps' not in data:
             _log.error("Error from device: %r" % data)
-            if 'Err' in data and data['Err'] == 905:
+            if data is not None and 'Err' in data and data['Err'] == 905:
                 self.__online = False
             return False
 
