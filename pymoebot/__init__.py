@@ -5,8 +5,9 @@ import tinytuya
 
 _log = logging.getLogger("pymoebot")
 
-version_tuple = (0,2,1)
-version = __version__ = "%d.%d.%d" % version_tuple
+__version_tuple = (0, 2, 1)
+__version__ = "%d.%d.%d" % __version_tuple
+
 
 class MoeBot:
 
@@ -119,6 +120,10 @@ class MoeBot:
     @property
     def tuya_version(self) -> str:
         return self.__tuya_version
+
+    @property
+    def pymoebot_version(self) -> str:
+        return __version__
 
     @property
     def mow_time(self) -> int:
