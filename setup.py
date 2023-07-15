@@ -1,4 +1,5 @@
 import setuptools
+import pymoebot
 
 
 with open("README.md", "r") as fh:
@@ -6,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pymoebot",
-    version="0.0.1",
+    version=pymoebot.__version__,
     author="David Whyte",
     author_email="David@Whyte.xyz",
     description="A Python library intended to monitor and control MoeBot robotic lawn mowers.",
