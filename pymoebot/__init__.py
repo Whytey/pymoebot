@@ -17,14 +17,14 @@ class MoeBot:
 
         self.__device = tinytuya.Device(self.__id, self.__ip, self.__key)
 
+        self.__listeners = []
+
         self.__tuya_version = self.__do_proto_check()
         self.__device.set_version(self.__tuya_version)
 
         self.__thread = None
         self.__shutdown = threading.Event()
         self.__shutdown.set()  # The thread should be flagged as not running
-
-        self.__listeners = []
 
         self.__battery = None
         self.__state = None
@@ -66,6 +66,8 @@ class MoeBot:
         if '114' in dps:
             self.__work_mode = dps['114']
 
+        for listener in self.__listeners:
+            listener(data)
         return True
 
     def poll(self):
@@ -88,8 +90,6 @@ class MoeBot:
                 _log.debug("Received Payload: %r", data)
 
                 self.__parse_payload(data)
-                for listener in self.__listeners:
-                    listener(data)
 
             # Send keepalive heartbeat
             payload = self.__device.generate_payload(tinytuya.HEART_BEAT)
