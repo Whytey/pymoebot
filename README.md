@@ -117,3 +117,6 @@ The following appear to be sub-states for when the mower is in EMERGENCY state. 
 * MOWER_UI_LOCKED
 * PLACE_INSIDE_STATION
 * BATTERY_NOT_ENOUGH
+
+## Internals
+A Facebook user has opened the main case of the MoeBot and taken photos.  Refer to the images captured in the ['internals'](images/internals) folder. 
