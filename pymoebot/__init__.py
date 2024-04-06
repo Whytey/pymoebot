@@ -8,6 +8,10 @@ from .__about__ import __version__
 _log = logging.getLogger("pymoebot")
 
 
+class ZoneConfig:
+    pass
+
+
 class MoeBot:
 
     def __init__(self, device_id: str, device_ip: str, local_key: str) -> None:
@@ -151,6 +155,14 @@ class MoeBot:
     def mow_in_rain(self, mow_in_rain: bool):
         result = self.__device.set_value(104, mow_in_rain)
         self.__parse_payload(result)
+
+    @property
+    def zones(self) -> ZoneConfig:
+        pass
+
+    @property.setter
+    def zones(self, zone_config: ZoneConfig):
+        pass
 
     @property
     def battery(self) -> int:
