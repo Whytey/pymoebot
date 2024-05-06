@@ -9,8 +9,6 @@ import tinytuya
 from .__about__ import __version__
 
 _log = logging.getLogger("pymoebot")
-_log.addHandler(logging.StreamHandler())
-_log.setLevel(logging.DEBUG)
 
 
 class ZoneConfig:
