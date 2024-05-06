@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 
-from pymoebot import MoeBotConnectionError, MoeBot
+from pymoebot import MoeBot
 
 
 class TestMoeBot(unittest.TestCase):
