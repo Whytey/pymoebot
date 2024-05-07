@@ -1,1 +1,1 @@
-tinytuya>=1.4.0
+tinytuya>=1.13.2

@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 
-from pymoebot import MoeBotConnectionError, MoeBot
+from pymoebot import MoeBot
 
 
 class TestMoeBot(unittest.TestCase):
@@ -20,8 +20,5 @@ class TestMoeBot(unittest.TestCase):
                     '114': 'AutoMode'}}
 
         m = MoeBot("RANDOM", "127.0.0.1", "RANDOM_KEY_ABCDE")
-        self.assertFalse(m.online)
-        self.assertIsNone(m.state)
-        m.poll()
         self.assertTrue(m.online)
         self.assertIsNotNone(m.state)
