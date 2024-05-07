@@ -9,7 +9,9 @@ import tinytuya
 from .__about__ import __version__
 
 _log = logging.getLogger("pymoebot")
-
+if __debug__:
+    _log.addHandler(logging.StreamHandler())
+    _log.setLevel(logging.DEBUG)
 
 class ZoneConfig:
     @staticmethod
@@ -73,33 +75,33 @@ class ZoneConfig:
 class MoeBot:
 
     def __init__(self, device_id: str, device_ip: str, local_key: str) -> None:
-        self.__id = device_id
-        self.__ip = device_ip
-        self.__key = local_key
+        self.__id: str = device_id
+        self.__ip: str = device_ip
+        self.__key: str = local_key
 
-        self.__device = tinytuya.Device(self.__id, self.__ip, self.__key)
+        self.__device: tinytuya.Device = tinytuya.Device(self.__id, self.__ip, self.__key)
 
         self.__listeners = []
 
-        self.__battery = None
+        self.__battery: int = None
         self.__state = None
         self.__emergency_state = None
-        self.__mow_in_rain = None
-        self.__mow_time = None
+        self.__mow_in_rain: bool = None
+        self.__mow_time: int = None
         self.__work_mode = None
-        self.__online = False
-        self.__zones = None
+        self.__online: bool = False
+        self.__zones: ZoneConfig = None
 
         self.__last_update = None
         self.__tuya_version = self.__do_proto_check()
         self.__device.set_version(self.__tuya_version)
 
-        self.__thread = None
-        self.__queue: Queue = None
-        self.__shutdown = Event()
+        self.__thread: Thread = None
+        self.__queue: Queue = Queue(20)
+        self.__shutdown: Event = Event()
         self.__shutdown.set()  # The thread should be flagged as not running
 
-    def __do_proto_check(self) -> float:
+    def __do_proto_check(self) -> str:
         versions = [3.4, 3.3]
         for version in versions:
             self.__device.set_version(version)
@@ -144,6 +146,17 @@ class MoeBot:
 
         return True
 
+    def __queue_command(self, dps, arg):
+        # If we're not listening, we're not processing the queue, so we should do that.
+        if self.is_listening:
+            # Put the command in the queue
+            self.__queue.put((dps, arg))
+        else:
+            _log.debug("Thread isn't running, so process the command now")
+            result = self.__device.set_value(dps, arg)
+            self.__parse_payload(result)
+        pass
+
     def __loop(self, send_queue: Queue):
         STATUS_TIMER = 30
         KEEPALIVE_TIMER = 12
@@ -185,7 +198,6 @@ class MoeBot:
 
     def listen(self):
         if self.__shutdown.is_set():
-            self.__queue = Queue(20)
             self.__thread = Thread(target=self.__loop, args=(self.__queue,))
             self.__thread.name = "pymoebot"
             self.__device.set_socketPersistent(True)
@@ -205,7 +217,7 @@ class MoeBot:
         self.__device.set_socketPersistent(False)
 
     @property
-    def is_listening(self) -> str:
+    def is_listening(self) -> bool:
         return not self.__shutdown.is_set()
 
     @property
@@ -213,7 +225,7 @@ class MoeBot:
         return self.__id
 
     @property
-    def online(self) -> str:
+    def online(self) -> bool:
         return self.__online
 
     @property
@@ -234,7 +246,7 @@ class MoeBot:
 
     @mow_time.setter
     def mow_time(self, mow_time: int):
-        self.__queue.put((105, mow_time))
+        self.__queue_command(105, mow_time)
 
     @property
     def mow_in_rain(self) -> bool:
@@ -242,7 +254,7 @@ class MoeBot:
 
     @mow_in_rain.setter
     def mow_in_rain(self, mow_in_rain: bool):
-        self.__queue.put((104, mow_in_rain))
+        self.__queue_command(104, mow_in_rain)
 
     @property
     def zones(self) -> ZoneConfig:
@@ -250,7 +262,7 @@ class MoeBot:
 
     @zones.setter
     def zones(self, zone_config: ZoneConfig):
-        self.__queue.put((113, zone_config.encode()))
+        self.__queue_command(113, zone_config.encode())
 
     @property
     def battery(self) -> int:
@@ -273,13 +285,13 @@ class MoeBot:
         if self.__state in ("STANDBY", "PAUSED", "CHARGING"):
             if self.__state == "PAUSED":
                 _log.debug("ContinueWork")
-                self.__queue.put((115, "ContinueWork"))
+                self.__queue_command(115, "ContinueWork")
             elif not spiral:
                 _log.debug("StartMowing")
-                self.__queue.put((115, "StartMowing"))
+                self.__queue_command(115, "StartMowing")
             else:
                 _log.debug("StartFixedMowing")
-                self.__queue.put((115, "StartFixedMowing"))
+                self.__queue_command(115, "StartFixedMowing")
         else:
             _log.error("Unable to start due to current state: %r", self.__state)
             raise MoeBotStateException()
@@ -287,12 +299,12 @@ class MoeBot:
     def poll(self):
         result = self.__device.status()
         self.__parse_payload(result)
-        self.__queue.put((109, ''))
+        self.__queue_command(109, '')
 
     def pause(self) -> None:
         _log.debug("Attempting to pause mowing: %r", self.__state)
         if self.__state in ("MOWING", "FIXED_MOWING"):
-            self.__queue.put((115, "PauseWork"))
+            self.__queue_command(115, "PauseWork")
         else:
             _log.error("Unable to pause due to current state: %r", self.__state)
             raise MoeBotStateException()
@@ -300,7 +312,7 @@ class MoeBot:
     def cancel(self) -> None:
         _log.debug("Attempting to cancel mowing: %r", self.__state)
         if self.__state in ("PAUSED", "CHARGING_WITH_TASK_SUSPEND", "PARK"):
-            self.__queue.put((115, "CancelWork"))
+            self.__queue_command(115, "CancelWork")
 
         else:
             _log.error("Unable to cancel due to current state: %r", self.__state)
@@ -309,7 +321,7 @@ class MoeBot:
     def dock(self) -> None:
         _log.debug("Attempting to dock mower: %r", self.__state)
         if self.__state in ("STANDBY", "STANDBY"):
-            self.__queue.put((115, "StartReturnStation"))
+            self.__queue_command(115, "StartReturnStation")
         else:
             _log.error("Unable to dock due to current state: %r", self.__state)
             raise MoeBotStateException()
