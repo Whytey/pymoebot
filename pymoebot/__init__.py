@@ -13,6 +13,7 @@ if __debug__:
     _log.addHandler(logging.StreamHandler())
     _log.setLevel(logging.DEBUG)
 
+
 class ZoneConfig:
     @staticmethod
     def decode(zone_bytes):
@@ -220,6 +221,28 @@ class MoeBot:
     def is_listening(self) -> bool:
         return not self.__shutdown.is_set()
 
+    def __wait_for_state(self, target_state, timeout=10):
+        can_poll = True
+        evt = Event()
+
+        def polling_task():
+            _log.debug("Waiting for a change to '{}'".format(target_state))
+            while can_poll:
+                current_state = self.state
+                if current_state == target_state:
+                    evt.set()
+                    break
+
+                _log.debug("Current state '{}' isn't the target state '{}'".format(current_state, target_state))
+                time.sleep(0.1)
+
+        t = Thread(target=polling_task)
+        t.start()
+        evt.wait(timeout=timeout)
+        can_poll = False
+        t.join()
+        _log.info("After waiting, the state is '{}'".format(self.state))
+
     @property
     def id(self) -> str:
         return self.__id
@@ -292,6 +315,7 @@ class MoeBot:
             else:
                 _log.debug("StartFixedMowing")
                 self.__queue_command(115, "StartFixedMowing")
+            self.__wait_for_state('MOWING')
         else:
             _log.error("Unable to start due to current state: %r", self.__state)
             raise MoeBotStateException()
@@ -305,6 +329,7 @@ class MoeBot:
         _log.debug("Attempting to pause mowing: %r", self.__state)
         if self.__state in ("MOWING", "FIXED_MOWING"):
             self.__queue_command(115, "PauseWork")
+            self.__wait_for_state('PAUSED')
         else:
             _log.error("Unable to pause due to current state: %r", self.__state)
             raise MoeBotStateException()
@@ -313,7 +338,7 @@ class MoeBot:
         _log.debug("Attempting to cancel mowing: %r", self.__state)
         if self.__state in ("PAUSED", "CHARGING_WITH_TASK_SUSPEND", "PARK"):
             self.__queue_command(115, "CancelWork")
-
+            self.__wait_for_state('STANDBY')
         else:
             _log.error("Unable to cancel due to current state: %r", self.__state)
             raise MoeBotStateException()
@@ -322,6 +347,7 @@ class MoeBot:
         _log.debug("Attempting to dock mower: %r", self.__state)
         if self.__state in ("STANDBY", "STANDBY"):
             self.__queue_command(115, "StartReturnStation")
+            self.__wait_for_state('PARK')
         else:
             _log.error("Unable to dock due to current state: %r", self.__state)
             raise MoeBotStateException()
