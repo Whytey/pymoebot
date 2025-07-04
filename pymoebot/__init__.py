@@ -126,6 +126,8 @@ class MoeBot:
         dps = data['dps']
         if '6' in dps:
             self.__battery = dps['6']
+        if '13' in dps:  #For Koszacy support
+            self.__battery = dps['13']
         if '101' in dps:
             self.__state = dps['101']
         if '103' in dps:
