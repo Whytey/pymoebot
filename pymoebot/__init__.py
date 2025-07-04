@@ -76,6 +76,7 @@ class ZoneConfig:
 class MoeBot:
 
     def __init__(self, device_id: str, device_ip: str, local_key: str) -> None:
+        _log.info("Using pymoebot version %r", __version__)
         self.__id: str = device_id
         self.__ip: str = device_ip
         self.__key: str = local_key
