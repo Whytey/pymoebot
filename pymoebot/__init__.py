@@ -88,6 +88,7 @@ class ZoneConfig:
 class MoeBot:
 
     def __init__(self, device_id: str, device_ip: str, local_key: str, tuya_version: float | None = None) -> None:
+        _log.info("Using pymoebot version %r", __version__)
         self.__id: str = device_id
         self.__ip: str = device_ip
         self.__key: str = local_key
@@ -138,6 +139,8 @@ class MoeBot:
         dps = data['dps']
         if '6' in dps:
             self.__battery = dps['6']
+        if '13' in dps:  #For Koszacy support
+            self.__battery = dps['13']
         if '101' in dps:
             self.__state = dps['101']
         if '103' in dps:
