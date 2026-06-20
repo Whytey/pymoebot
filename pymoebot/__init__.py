@@ -9,9 +9,21 @@ import tinytuya
 from .__about__ import __version__
 
 _log = logging.getLogger("pymoebot")
-if __debug__:
-    _log.addHandler(logging.StreamHandler())
-    _log.setLevel(logging.DEBUG)
+
+
+def scan_local_devices():
+    devices = tinytuya.deviceScan()
+    _log.debug(f"Found {len(devices)} local devices")
+    return devices
+
+
+def scan_cloud_devices(region="us", api_key="API_KEY", secret_key="SECRET_KEY"):
+    _log.debug(f"Logging into the Cloud with region '{region}'")
+    cloud = tinytuya.Cloud(apiRegion=region, apiKey=api_key, apiSecret=secret_key)
+    _log.info(f"Logged into the Cloud. Scanning for devices in region '{region}'")
+    devices = cloud.getdevices(verbose=True)
+    _log.debug(f"Found {len(devices)} cloud devices")
+    return devices
 
 
 class ZoneConfig:
@@ -75,7 +87,7 @@ class ZoneConfig:
 
 class MoeBot:
 
-    def __init__(self, device_id: str, device_ip: str, local_key: str) -> None:
+    def __init__(self, device_id: str, device_ip: str, local_key: str, tuya_version: float | None = None) -> None:
         self.__id: str = device_id
         self.__ip: str = device_ip
         self.__key: str = local_key
@@ -94,7 +106,7 @@ class MoeBot:
         self.__zones: ZoneConfig = None
 
         self.__last_update = None
-        self.__tuya_version = self.__do_proto_check()
+        self.__tuya_version = tuya_version if tuya_version is not None else self.__do_proto_check()
         self.__device.set_version(self.__tuya_version)
 
         self.__thread: Thread = None
@@ -103,7 +115,7 @@ class MoeBot:
         self.__shutdown.set()  # The thread should be flagged as not running
 
     def __do_proto_check(self) -> str:
-        versions = [3.4, 3.3]
+        versions = [3.5, 3.4, 3.3]
         for version in versions:
             self.__device.set_version(version)
             result = self.__device.status()
