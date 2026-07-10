@@ -97,6 +97,7 @@ Will result in:
 | 113  | r/w       | [byte data]                                                                                                                                                                                  | 'Partition parameters' specifies the zone mowing configuration                          |
 | 114  | r/?       | AutoMode/??                                                                                                                                                                                  | 'WorkMode'                                                                              |
 | 115  | w         | <ul><li>StartMowing</li><li>StartFixedMowing</li><li>PauseWork</li><li>ContinueWork</li><li>CancelWork</li><li>StartReturnStation</li><ul>                                                   | 'Machine Control CMD' used to change mower state                                        |
+| 121  | r/w       |Stop Mowing on Reverse                                                                                                                                                                        | used to enable/disable knives when going on reverse                                     |
 
 ## State Model
 
